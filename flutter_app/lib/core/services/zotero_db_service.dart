@@ -211,7 +211,6 @@ class ZoteroDbService {
       volume: row['volume'] as String?,
       issue: row['issue'] as String?,
       source: CitationSource.zotero,
-      formattedStrings: const {}, // Will be populated by CitationFormatter
     );
   }
 }

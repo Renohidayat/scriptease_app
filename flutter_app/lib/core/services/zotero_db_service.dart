@@ -133,14 +133,14 @@ class ZoteroDbService {
         GROUP_CONCAT(
           CASE
             WHEN creators.firstName IS NOT NULL AND creators.firstName != ''
-            THEN creators.lastName || ', ' || SUBSTR(creators.firstName, 1, 1) || '.'
+            THEN creators.lastName || ', ' || creators.firstName
             ELSE creators.lastName
           END,
           '; '
         ) AS authors
       FROM items
       JOIN itemTypes ON items.itemTypeID = itemTypes.itemTypeID
-      -- Title (fieldID = 1)
+      -- Title (fieldID = 1 for most items)
       LEFT JOIN itemData     AS title_d  ON items.itemID = title_d.itemID  AND title_d.fieldID  = 1
       LEFT JOIN itemDataValues AS title_v ON title_d.valueID = title_v.valueID
       -- Year / Date (fieldID = 14)
@@ -164,12 +164,12 @@ class ZoteroDbService {
       -- Issue/Number (fieldID = 29)
       LEFT JOIN itemData     AS issue_d  ON items.itemID = issue_d.itemID  AND issue_d.fieldID  = 29
       LEFT JOIN itemDataValues AS issue_v ON issue_d.valueID = issue_v.valueID
-      -- Creators
+      -- Creators (Authors)
       LEFT JOIN itemCreators ON items.itemID = itemCreators.itemID AND itemCreators.creatorTypeID = 1
       LEFT JOIN creators     ON itemCreators.creatorID = creators.creatorID
-      -- Exclude deleted items
+      -- Exclude deleted items and attachments
       WHERE items.itemID NOT IN (SELECT itemID FROM deletedItems)
-        AND items.itemTypeID NOT IN (1, 14) -- exclude attachments & notes
+        AND items.itemTypeID NOT IN (1, 14) 
         AND (
           (? != '' AND creators.lastName LIKE '%' || ? || '%')
           OR (? != '' AND title_v.value LIKE '%' || ? || '%')

@@ -1,13 +1,13 @@
-# ⚡ AntiGravity WP
+# ⚡ ScriptEase App
 
 > **Defy the gravity of academic writing — write, cite, and publish at the speed of thought.**
 
 [![Flutter Windows](https://img.shields.io/badge/Flutter-Windows-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Python FastAPI](https://img.shields.io/badge/Python-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Status](https://img.shields.io/badge/Status-Active%20Dev-orange)](https://github.com/your_username/antigravity-wp/issues)
+[![Status](https://img.shields.io/badge/Status-Active%20Dev-orange)](https://github.com/your_username/scriptease-app/issues)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-AntiGravity WP is an **AI-powered academic word processor** for Windows — a Microsoft Word alternative built specifically for Indonesian students and researchers writing skripsi, tesis, and disertasi.
+ScriptEase App is an **AI-powered academic word processor** for Windows — a Microsoft Word alternative built specifically for Indonesian students and researchers writing skripsi, tesis, and disertasi.
 
 ## 🚫 The Problem (4 Gravitational Forces)
 
@@ -43,8 +43,8 @@ LLM APIs (OpenAI / Gemini / Anthropic) — only when needed
 ```bash
 # Requirements: Flutter 3.22+, Python 3.11+, Windows 10/11
 
-git clone https://github.com/your_username/antigravity-wp.git
-cd antigravity-wp
+git clone https://github.com/your_username/scriptease-app.git
+cd scriptease-app
 
 # Flutter
 cd flutter_app && flutter pub get && flutter run -d windows

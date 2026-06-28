@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// app_database.dart — AntiGravity WP Local SQLite Database
+// app_database.dart — ScriptEase App Local SQLite Database
 // Uses Drift for type-safe, reactive SQLite access
 // ═══════════════════════════════════════════════════════════════════
 
@@ -274,7 +274,7 @@ class AppDatabase extends _$AppDatabase {
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(path.join(dbFolder.path, 'antigravity_wp', 'app.sqlite'));
+    final file = File(path.join(dbFolder.path, 'scriptease_app', 'app.sqlite'));
     await file.parent.create(recursive: true);
     return NativeDatabase.createInBackground(file);
   });

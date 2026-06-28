@@ -1,4 +1,4 @@
-# AntiGravity WP — System Architecture
+# ScriptEase App — System Architecture
 
 ## High-Level Architecture Diagram
 

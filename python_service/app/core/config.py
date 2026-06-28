@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     
     # Paths
-    DATA_DIR: Path = Path.home() / "AppData" / "Local" / "AntiGravityWP"
+    DATA_DIR: Path = Path.home() / "AppData" / "Local" / "ScriptEaseApp"
     CHROMA_DIR: Path = DATA_DIR / "chroma_db"
     
     # LLM (overridden at runtime from Flutter settings)

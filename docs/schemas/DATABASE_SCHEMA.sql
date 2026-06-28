@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════════
--- AntiGravity WP — SQLite Database Schema
+-- ScriptEase App — SQLite Database Schema
 -- Generated for documentation purposes
 -- Actual implementation: Drift ORM in flutter_app/lib/core/database/
 -- ════════════════════════════════════════════════════════════════════

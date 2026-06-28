@@ -1,5 +1,5 @@
 """
-AntiGravity WP — Python FastAPI Local Microservice
+ScriptEase App — Python FastAPI Local Microservice
 Runs on localhost:8765
 Handles: LLM streaming, RAG pipeline, PDF processing, citation formatting
 """
@@ -15,7 +15,7 @@ from app.core.config import settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events"""
-    print(f"🚀 AntiGravity WP Service starting on port {settings.PORT}")
+    print(f"🚀 ScriptEase App Service starting on port {settings.PORT}")
     print(f"📁 Data directory: {settings.DATA_DIR}")
     
     # Initialize ChromaDB collection on startup
@@ -26,11 +26,11 @@ async def lifespan(app: FastAPI):
     
     yield
     
-    print("🛑 AntiGravity WP Service shutting down")
+    print("🛑 ScriptEase App Service shutting down")
 
 
 app = FastAPI(
-    title="AntiGravity WP — Local AI Service",
+    title="ScriptEase App — Local AI Service",
     description="Local microservice for PDF processing, RAG, and LLM proxying",
     version="0.1.0",
     lifespan=lifespan,
@@ -53,7 +53,7 @@ app.include_router(api_v1_router, prefix="/api/v1")
 async def health_check():
     return {
         "status": "healthy",
-        "service": "antigravity-wp-local",
+        "service": "scriptease-app-local",
         "version": "0.1.0"
     }
 

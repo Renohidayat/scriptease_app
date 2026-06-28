@@ -19,14 +19,44 @@ class EditorScreen extends StatelessWidget {
           BlocBuilder<EditorBloc, EditorState>(
             builder: (context, state) {
               return state.maybeMap(
-                loaded: (s) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Center(
-                    child: Text(
-                      s.isSaving ? 'Saving...' : 'Saved',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                loaded: (s) => Row(
+                  children: [
+                    if (s.isExporting)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: SizedBox(
+                          width: 16, height: 16, 
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Center(
+                        child: Text(
+                          s.isSaving ? 'Saving...' : 'Saved',
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ),
                     ),
-                  ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.download),
+                      tooltip: 'Export Document',
+                      onSelected: (format) {
+                        context.read<EditorBloc>().add(EditorEvent.exportDocument(format));
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'docx',
+                          child: Text('Export to DOCX'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'pdf',
+                          child: Text('Export to PDF'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
+                  ],
                 ),
                 orElse: () => const SizedBox.shrink(),
               );

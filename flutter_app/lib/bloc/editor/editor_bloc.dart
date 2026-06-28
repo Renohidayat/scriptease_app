@@ -5,19 +5,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 import '../../core/database/dao/documents_dao.dart';
+import '../../core/services/export_service.dart';
 import 'editor_event.dart';
 import 'editor_state.dart';
 
 class EditorBloc extends Bloc<EditorEvent, EditorState> {
   final DocumentsDao _documentsDao;
+  final ExportService _exportService;
   Timer? _debounceTimer;
 
-  EditorBloc(this._documentsDao) : super(const EditorState.initial()) {
+  EditorBloc(this._documentsDao, this._exportService) : super(const EditorState.initial()) {
     on<EditorEvent>((event, emit) async {
       await event.map(
         loadDocument: (e) => _onLoadDocument(e, emit),
         saveDocument: (e) => _onSaveDocument(e, emit),
         contentChanged: (e) => _onContentChanged(e, emit),
+        exportDocument: (e) => _onExportDocument(e, emit),
       );
     });
   }
@@ -27,11 +30,23 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     emit(const EditorState.loading());
     try {
       final docId = event.documentId;
-      final dbDoc = await _documentsDao.getDocumentById(docId);
+      var dbDoc = await _documentsDao.getDocumentById(docId);
       
       if (dbDoc == null) {
-        emit(const EditorState.error('Document not found.'));
-        return;
+        // Create a new empty document
+        final newId = await _documentsDao.createDocument(
+          db.DocumentsCompanion.insert(
+            title: 'Untitled Document',
+            contentDelta: '[]',
+            plainText: '',
+            wordCount: 0,
+          ),
+        );
+        dbDoc = await _documentsDao.getDocumentById(newId);
+        if (dbDoc == null) {
+          emit(const EditorState.error('Failed to create document.'));
+          return;
+        }
       }
 
       quill.Document quillDoc;
@@ -91,6 +106,32 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     } catch (e) {
       emit(loadedState.copyWith(isSaving: false));
       // Optionally handle save error
+    }
+  }
+
+  Future<void> _onExportDocument(
+      dynamic event, Emitter<EditorState> emit) async {
+    final currentState = state;
+    if (currentState.mapOrNull(loaded: (s) => s) == null) return;
+    
+    final loadedState = currentState.mapOrNull(loaded: (s) => s)!;
+    emit(loadedState.copyWith(isExporting: true));
+    
+    try {
+      final deltaJson = jsonEncode(loadedState.quillController.document.toDelta().toJson());
+      // For now pass empty citations, later we will parse the inline citations
+      await _exportService.exportDocument(
+        deltaJson: deltaJson,
+        format: event.format,
+        citations: [], 
+      );
+      emit(loadedState.copyWith(isExporting: false));
+    } catch (e) {
+      emit(loadedState.copyWith(isExporting: false));
+      emit(EditorState.error('Export failed: $e'));
+      // Wait briefly then restore loaded state so user can continue
+      await Future.delayed(const Duration(seconds: 3));
+      emit(loadedState.copyWith(isExporting: false));
     }
   }
 

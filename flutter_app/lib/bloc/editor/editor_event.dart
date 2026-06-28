@@ -7,4 +7,5 @@ class EditorEvent with _$EditorEvent {
   const factory EditorEvent.loadDocument(int documentId) = _LoadDocument;
   const factory EditorEvent.saveDocument() = _SaveDocument;
   const factory EditorEvent.contentChanged() = _ContentChanged;
+  const factory EditorEvent.exportDocument(String format) = _ExportDocument;
 }

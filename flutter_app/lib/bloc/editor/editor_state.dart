@@ -12,6 +12,7 @@ class EditorState with _$EditorState {
     required db.Document dbDocument,
     required quill.QuillController quillController,
     @Default(false) bool isSaving,
+    @Default(false) bool isExporting,
   }) = _Loaded;
   const factory EditorState.error(String message) = _Error;
 }

@@ -6,7 +6,7 @@ part 'citation.g.dart';
 enum CitationSource { zotero, mendeley, manual }
 
 @freezed
-class Citation with _$Citation {
+abstract class Citation with _$Citation {
   const Citation._();
 
   const factory Citation({

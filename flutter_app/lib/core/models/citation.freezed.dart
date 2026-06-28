@@ -218,8 +218,8 @@ return $default(_that.citeKey,_that.title,_that.authors,_that.year,_that.journal
 /// @nodoc
 @JsonSerializable()
 
-class _Citation implements Citation {
-  const _Citation({required this.citeKey, required this.title, required final  List<String> authors, this.year, this.journal, this.volume, this.issue, this.pages, this.doi, this.url, required this.source}): _authors = authors;
+class _Citation extends Citation {
+  const _Citation({required this.citeKey, required this.title, required final  List<String> authors, this.year, this.journal, this.volume, this.issue, this.pages, this.doi, this.url, required this.source}): _authors = authors,super._();
   factory _Citation.fromJson(Map<String, dynamic> json) => _$CitationFromJson(json);
 
 @override final  String citeKey;

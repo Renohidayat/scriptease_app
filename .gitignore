@@ -1,0 +1,48 @@
+# Flutter
+flutter_app/.dart_tool/
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins-dependencies
+flutter_app/build/
+flutter_app/*.g.dart
+flutter_app/*.freezed.dart
+flutter_app/pubspec.lock
+flutter_app/windows/flutter/generated_plugin_registrant.cc
+flutter_app/windows/flutter/generated_plugins.cmake
+
+# Python
+python_service/__pycache__/
+python_service/**/__pycache__/
+python_service/.venv/
+python_service/venv/
+python_service/*.egg-info/
+python_service/.pytest_cache/
+python_service/chroma_data/
+python_service/.env
+
+# Secrets & Keys
+*.env
+.env.*
+api_keys.json
+secrets.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+
+# Build outputs
+*.exe
+*.dll
+*.so
+dist/
+build/
+
+# Database files (user data)
+*.sqlite
+*.db
+!*_schema.sql

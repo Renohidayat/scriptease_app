@@ -1,0 +1,79 @@
+name: antigravity_wp
+description: "AntiGravity WP — AI-Powered Academic Word Processor for Windows"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Rich Text Editor
+  flutter_quill: ^10.8.3
+
+  # State Management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+  # Dependency Injection
+  get_it: ^7.7.0
+  injectable: ^2.4.2
+
+  # Navigation
+  go_router: ^14.2.0
+
+  # Database
+  drift: ^2.20.2
+  sqlite3_flutter_libs: ^0.5.24
+  sqflite_common_ffi: ^2.3.3    # For Zotero direct access on Windows
+
+  # Code Generation Helpers
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # Networking
+  dio: ^5.5.0+1
+  http: ^1.2.1
+
+  # File Management
+  path_provider: ^2.1.3
+  path: ^1.9.0
+  file_picker: ^8.1.2
+  desktop_drop: ^0.4.4
+
+  # Caching
+  hive_flutter: ^1.1.0
+
+  # UI Utilities
+  window_manager: ^0.3.9
+  split_view: ^3.2.2
+  lottie: ^3.1.2
+  shimmer: ^3.0.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.4.11
+  drift_dev: ^2.20.2
+  injectable_generator: ^2.6.2
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+
+  # Testing
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.4
+
+  # Linting
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/
+    - assets/lottie/

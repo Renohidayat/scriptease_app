@@ -1,0 +1,33 @@
+# Web Framework
+fastapi==0.111.0
+uvicorn[standard]==0.30.0
+pydantic==2.8.0
+pydantic-settings==2.3.0
+
+# LLM Clients
+openai==1.35.0
+anthropic==0.30.0
+google-generativeai==0.7.2
+
+# PDF Processing
+PyMuPDF==1.24.5          # fitz — fast PDF text extraction
+python-docx==1.1.2        # .docx read/write
+
+# PDF Export
+WeasyPrint==62.1          # HTML → PDF (no wkhtmltopdf binary needed)
+
+# RAG / Vector Store
+chromadb==0.5.0           # Local embedded vector database
+sentence-transformers==3.0.1  # Local embeddings (all-MiniLM-L6-v2)
+
+# Utilities
+aiofiles==24.1.0          # Async file operations
+python-multipart==0.0.9   # File upload support
+httpx==0.27.0             # Async HTTP client
+jinja2==3.1.4             # Template rendering for citation strings
+hashlib                   # Built-in — for file hashing (SHA-256)
+
+# Development
+pytest==8.2.2
+pytest-asyncio==0.23.7
+httpx==0.27.0             # For FastAPI test client

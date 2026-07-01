@@ -7,6 +7,7 @@ import 'bloc/editor/editor_bloc.dart';
 import 'bloc/editor/editor_event.dart';
 import 'core/database/app_database.dart';
 import 'core/services/export_service.dart';
+import 'core/database/dao/settings_dao.dart';
 import 'ui/editor/editor_screen.dart';
 
 void main() {
@@ -38,28 +39,33 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider<EditorBloc>(
-          create: (context) {
-            final bloc = EditorBloc(db.documentsDao, exportService);
-            // Load a dummy document for now (ID: 1)
-            // In a real app, you'd have a document list screen
-            bloc.add(const EditorEvent.loadDocument(1));
-            return bloc;
-          },
-        ),
-        BlocProvider<AiChatBloc>(
-          create: (context) => AiChatBloc(dio),
-        ),
+        RepositoryProvider<SettingsDao>.value(value: db.settingsDao),
       ],
-      child: MaterialApp(
-        title: 'ScriptEase',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<EditorBloc>(
+            create: (context) {
+              final bloc = EditorBloc(db.documentsDao, exportService);
+              // Load a dummy document for now (ID: 1)
+              // In a real app, you'd have a document list screen
+              bloc.add(const EditorEvent.loadDocument(1));
+              return bloc;
+            },
+          ),
+          BlocProvider<AiChatBloc>(
+            create: (context) => AiChatBloc(dio, db.settingsDao),
+          ),
+        ],
+        child: MaterialApp(
+          title: 'ScriptEase',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+            useMaterial3: true,
+          ),
+          home: const EditorScreen(),
         ),
-        home: const EditorScreen(),
       ),
     );
   }

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import os
 import uuid
 import tempfile
-from typing import List, Optional
+from typing import List
 
 from app.services.document.export_service import ExportService
 

@@ -3,13 +3,16 @@ LLM Endpoint — Streaming completions via SSE
 POST /api/v1/llm/stream
 """
 
+import asyncio
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import json
 from app.services.llm.llm_service import (
-    create_llm_provider, ACADEMIC_SYSTEM_PROMPT
+    create_llm_provider, ACADEMIC_SYSTEM_PROMPT, LLMProviderError
 )
+from app.core.config import settings
+from app.core.db import get_setting
 
 router = APIRouter()
 
@@ -41,9 +44,8 @@ class LlmStreamRequest(BaseModel):
     citation_context: list[CitationContext] = []
     rag_context: str = ""
     user_prompt: str
-    provider: str = "openai"
-    api_key: str
-    model: str = "gpt-4o"
+    provider: str | None = None
+    model: str | None = None
     temperature: float = 0.7
     max_tokens: int = 4096
 
@@ -72,7 +74,12 @@ async def stream_llm_response(request: LlmStreamRequest):
     messages = [{"role": m.role, "content": m.content} for m in request.messages]
     messages.append({"role": "user", "content": request.user_prompt})
 
-    provider = create_llm_provider(request.provider, request.api_key)
+    try:
+        provider = create_llm_provider(request.provider)
+    except LLMProviderError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+        
+    model = request.model or get_setting("llm_model", settings.LLM_MODEL)
 
     async def event_generator():
         try:
@@ -80,7 +87,7 @@ async def stream_llm_response(request: LlmStreamRequest):
             async for chunk in provider.stream(
                 messages=messages,
                 system=system,
-                model=request.model,
+                model=model,
                 temperature=request.temperature,
                 max_tokens=request.max_tokens,
             ):
@@ -92,8 +99,14 @@ async def stream_llm_response(request: LlmStreamRequest):
             final = json.dumps({"chunk": "", "full_text": full_text, "done": True})
             yield f"data: {final}\n\n"
         
-        except Exception as e:
+        except asyncio.CancelledError:
+            # Client disconnected
+            raise
+        except LLMProviderError as e:
             error = json.dumps({"error": str(e), "done": True})
+            yield f"data: {error}\n\n"
+        except Exception as e:
+            error = json.dumps({"error": f"Internal Error: {str(e)}", "done": True})
             yield f"data: {error}\n\n"
 
     return StreamingResponse(
@@ -102,5 +115,6 @@ async def stream_llm_response(request: LlmStreamRequest):
         headers={
             "Cache-Control": "no-cache",
             "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
         },
     )

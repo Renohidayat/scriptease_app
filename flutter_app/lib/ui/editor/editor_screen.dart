@@ -6,6 +6,7 @@ import '../../bloc/editor/editor_bloc.dart';
 import '../../bloc/editor/editor_state.dart';
 import '../chat/chat_panel.dart';
 import 'embeds/citation_embed_builder.dart';
+import '../settings/settings_screen.dart';
 
 class EditorScreen extends StatelessWidget {
   const EditorScreen({super.key});
@@ -54,6 +55,19 @@ class EditorScreen extends StatelessWidget {
                           child: Text('Export to PDF'),
                         ),
                       ],
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      tooltip: 'Settings',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsScreen(),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(width: 16),
                   ],

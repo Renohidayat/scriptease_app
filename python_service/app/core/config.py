@@ -1,6 +1,5 @@
 """Application configuration via pydantic-settings"""
 
-import os
 from pathlib import Path
 from pydantic_settings import BaseSettings
 
@@ -16,7 +15,9 @@ class Settings(BaseSettings):
     
     # LLM (overridden at runtime from Flutter settings)
     LLM_PROVIDER: str = "openai"
-    LLM_API_KEY: str = ""
+    OPENAI_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
+    ANTHROPIC_API_KEY: str = ""
     LLM_MODEL: str = "gpt-4o"
     
     @property
@@ -30,6 +31,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 settings = Settings()

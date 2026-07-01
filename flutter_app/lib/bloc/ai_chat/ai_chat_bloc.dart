@@ -5,10 +5,13 @@ import 'package:dio/dio.dart';
 import 'ai_chat_event.dart';
 import 'ai_chat_state.dart';
 
+import '../../core/database/dao/settings_dao.dart';
+
 class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
   final Dio _dio;
+  final SettingsDao _settingsDao;
 
-  AiChatBloc(this._dio) : super(const AiChatState()) {
+  AiChatBloc(this._dio, this._settingsDao) : super(const AiChatState()) {
     on<AiChatEvent>((event, emit) async {
       await event.map(
         sendMessage: (e) => _onSendMessage(e, emit),
@@ -29,12 +32,23 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
     ));
 
     try {
+      final provider = await _settingsDao.getValue('llm_provider') ?? 'openai';
+      final model = await _settingsDao.getValue('llm_model') ?? 'gpt-4o';
+      final apiKey = await _settingsDao.getValue('llm_api_key') ?? '';
+
+      if (apiKey.trim().isEmpty) {
+        add(const AiChatEvent.streamError('API Key is not configured. Please set it in Settings.'));
+        return;
+      }
+
       final response = await _dio.post(
         'http://127.0.0.1:8765/api/v1/llm/stream',
         data: {
           "messages": [], // We can send past history here if needed
           "user_prompt": event.text,
-          "api_key": "YOUR_API_KEY", // Will be pulled from SettingsDao later
+          "provider": provider,
+          "model": model,
+          "api_key": apiKey,
           "document_context": {
             "document_title": "Active Document",
             "current_chapter": "BAB I",

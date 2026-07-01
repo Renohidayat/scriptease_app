@@ -46,3 +46,5 @@ build/
 *.sqlite
 *.db
 !*_schema.sql
+.env
+.venv/

@@ -3,12 +3,18 @@ LLM Service — Provider-agnostic streaming LLM client
 Supports: OpenAI, Anthropic Claude, Google Gemini
 """
 
+import asyncio
 from abc import ABC, abstractmethod
 from typing import AsyncGenerator
 import openai
 import anthropic
 import google.generativeai as genai
 from app.core.config import settings
+from app.core.db import get_setting
+
+
+class LLMProviderError(Exception):
+    pass
 
 
 class LLMProvider(ABC):
@@ -30,16 +36,22 @@ class OpenAIProvider(LLMProvider):
 
     async def stream(self, messages, system, model, temperature=0.7, max_tokens=4096):
         full_messages = [{"role": "system", "content": system}, *messages]
-        async with self.client.chat.completions.stream(
-            model=model,
-            messages=full_messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        ) as stream:
+        try:
+            stream = await self.client.chat.completions.create(
+                model=model,
+                messages=full_messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=30.0,
+                stream=True,
+            )
             async for chunk in stream:
-                delta = chunk.choices[0].delta.content
-                if delta:
-                    yield delta
+                if chunk.choices and chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            raise LLMProviderError(f"OpenAI Error: {str(e)}") from e
 
 
 class AnthropicProvider(LLMProvider):
@@ -47,48 +59,74 @@ class AnthropicProvider(LLMProvider):
         self.client = anthropic.AsyncAnthropic(api_key=api_key)
 
     async def stream(self, messages, system, model, temperature=0.7, max_tokens=4096):
-        async with self.client.messages.stream(
-            model=model,
-            system=system,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        ) as stream:
-            async for text in stream.text_stream:
-                yield text
+        try:
+            async with self.client.messages.stream(
+                model=model,
+                system=system,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=30.0,
+            ) as stream:
+                async for text in stream.text_stream:
+                    yield text
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            raise LLMProviderError(f"Anthropic Error: {str(e)}") from e
 
 
 class GeminiProvider(LLMProvider):
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model_name = None
 
     async def stream(self, messages, system, model, temperature=0.7, max_tokens=4096):
         genai_model = genai.GenerativeModel(
             model_name=model,
             system_instruction=system,
         )
-        # Convert OpenAI-style messages to Gemini format
         gemini_messages = [
             {"role": m["role"].replace("assistant", "model"),
              "parts": [m["content"]]}
             for m in messages
         ]
-        response = await genai_model.generate_content_async(
-            gemini_messages,
-            generation_config=genai.GenerationConfig(
-                temperature=temperature,
-                max_output_tokens=max_tokens,
-            ),
-            stream=True,
-        )
-        async for chunk in response:
-            yield chunk.text
+        try:
+            response = await asyncio.wait_for(
+                genai_model.generate_content_async(
+                    gemini_messages,
+                    generation_config=genai.GenerationConfig(
+                        temperature=temperature,
+                        max_output_tokens=max_tokens,
+                    ),
+                    stream=True,
+                ),
+                timeout=30.0,
+            )
+            async for chunk in response:
+                if chunk.text:
+                    yield chunk.text
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            raise LLMProviderError(f"Gemini Error: {str(e)}") from e
 
 
-def create_llm_provider(provider: str, api_key: str) -> LLMProvider:
+def create_llm_provider(provider: str | None = None) -> LLMProvider:
     """Factory function — returns the correct provider"""
-    match provider.lower():
+    provider = (provider or get_setting("llm_provider", settings.LLM_PROVIDER)).lower()
+    
+    api_key = None
+    if provider == "openai":
+        api_key = settings.OPENAI_API_KEY
+    elif provider == "anthropic":
+        api_key = settings.ANTHROPIC_API_KEY
+    elif provider == "gemini":
+        api_key = settings.GEMINI_API_KEY
+
+    if not api_key:
+        raise LLMProviderError(f"API key missing for provider: {provider}")
+
+    match provider:
         case "openai":
             return OpenAIProvider(api_key)
         case "anthropic":
@@ -96,7 +134,7 @@ def create_llm_provider(provider: str, api_key: str) -> LLMProvider:
         case "gemini":
             return GeminiProvider(api_key)
         case _:
-            raise ValueError(f"Unknown LLM provider: {provider}")
+            raise LLMProviderError(f"Unknown LLM provider: {provider}")
 
 
 # Academic writing system prompt template
